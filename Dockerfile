@@ -18,9 +18,8 @@ COPY tsconfig.json ./
 COPY ui ./ui
 
 RUN npm run build
-RUN npm prune --omit=dev && npm cache clean --force
 
-FROM node:22-alpine AS runtime
+FROM alpine:3.22 AS runtime
 
 ARG OCI_SOURCE="https://github.com/local/deepseek-mcp"
 
@@ -36,15 +35,16 @@ ENV DEEPSEEK_DATA_DIR=/app/data
 
 WORKDIR /app
 
-RUN addgroup -S deepseek && \
+RUN apk add --no-cache ca-certificates libstdc++ && \
+  addgroup -S deepseek && \
   adduser -S deepseek -G deepseek && \
   mkdir -p /app/data && \
   chown -R deepseek:deepseek /app
 
-COPY --from=build --chown=deepseek:deepseek /app/package.json /app/package-lock.json ./
-COPY --from=build --chown=deepseek:deepseek /app/node_modules ./node_modules
+COPY --from=build /usr/local/bin/node /usr/local/bin/node
+COPY --from=build --chown=deepseek:deepseek /app/package.json ./
 COPY --from=build --chown=deepseek:deepseek /app/assets ./assets
-COPY --from=build --chown=deepseek:deepseek /app/dist/mcp ./dist/mcp
+COPY --from=build --chown=deepseek:deepseek /app/dist/runtime ./dist/runtime
 COPY --from=build --chown=deepseek:deepseek /app/dist/ui ./dist/ui
 
 USER deepseek
@@ -54,4 +54,4 @@ VOLUME ["/app/data"]
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 CMD node -e "fetch('http://127.0.0.1:' + (process.env.DEEPSEEK_MCP_HTTP_PORT || '8799') + '/health').then((response) => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))"
 
-CMD ["node", "dist/mcp/index.js"]
+CMD ["node", "dist/runtime/index.js"]

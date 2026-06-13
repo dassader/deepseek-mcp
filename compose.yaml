@@ -1,0 +1,22 @@
+name: deepseek-mcp
+
+services:
+  deepseek-mcp:
+    image: ${DEEPSEEK_MCP_IMAGE:-deepseek-mcp:local}
+    build:
+      context: .
+    ports:
+      - "${DEEPSEEK_MCP_HTTP_PORT:-8799}:8799"
+    environment:
+      DEEPSEEK_API_KEY: "replace-with-your-deepseek-api-key"
+      DEEPSEEK_BASE_URL: https://api.deepseek.com
+      DEEPSEEK_DATA_DIR: /app/data
+      DEEPSEEK_MCP_HTTP_ENABLED: "true"
+      DEEPSEEK_MCP_HTTP_HOST: 0.0.0.0
+      DEEPSEEK_MCP_HTTP_PORT: 8799
+    volumes:
+      - deepseek-mcp-data:/app/data
+    restart: unless-stopped
+
+volumes:
+  deepseek-mcp-data:
