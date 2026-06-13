@@ -18,6 +18,8 @@ COPY tsconfig.json ./
 COPY ui ./ui
 
 RUN npm run build
+RUN mkdir -p dist/assets && \
+  node -e "const fs=require('node:fs'); const zlib=require('node:zlib'); const params={[zlib.constants.BROTLI_PARAM_QUALITY]:11}; fs.writeFileSync('dist/assets/tokenizer.json.br', zlib.brotliCompressSync(fs.readFileSync('assets/tokenizer.json'), { params })); fs.copyFileSync('assets/tokenizer_config.json', 'dist/assets/tokenizer_config.json');"
 
 FROM alpine:3.22 AS runtime
 
@@ -43,7 +45,7 @@ RUN apk add --no-cache ca-certificates libstdc++ && \
 
 COPY --from=build /usr/local/bin/node /usr/local/bin/node
 COPY --from=build --chown=deepseek:deepseek /app/package.json ./
-COPY --from=build --chown=deepseek:deepseek /app/assets ./assets
+COPY --from=build --chown=deepseek:deepseek /app/dist/assets ./assets
 COPY --from=build --chown=deepseek:deepseek /app/dist/runtime ./dist/runtime
 COPY --from=build --chown=deepseek:deepseek /app/dist/ui ./dist/ui
 

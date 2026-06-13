@@ -7,7 +7,8 @@ const thisFile = fileURLToPath(import.meta.url);
 function findPackageRoot(start: string): string {
   let cursor = start;
   for (;;) {
-    if (existsSync(path.join(cursor, "assets", "tokenizer.json")) && existsSync(path.join(cursor, "package.json"))) {
+    const hasTokenizer = existsSync(path.join(cursor, "assets", "tokenizer.json")) || existsSync(path.join(cursor, "assets", "tokenizer.json.br"));
+    if (hasTokenizer && existsSync(path.join(cursor, "package.json"))) {
       return cursor;
     }
     const parent = path.dirname(cursor);

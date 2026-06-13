@@ -1,4 +1,5 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
+import { brotliDecompressSync } from "node:zlib";
 import path from "node:path";
 import { Tokenizer } from "@huggingface/tokenizers";
 import { packageRoot } from "../shared/paths.js";
@@ -6,9 +7,17 @@ import { packageRoot } from "../shared/paths.js";
 let tokenizer: Tokenizer | undefined;
 
 function tokenizerPath(): { tokenizerJson: string; tokenizerConfig: string } {
-  const tokenizerJson = process.env.DEEPSEEK_TOKENIZER_JSON ?? path.join(packageRoot, "assets", "tokenizer.json");
+  const defaultTokenizerJson = path.join(packageRoot, "assets", "tokenizer.json");
+  const tokenizerJson =
+    process.env.DEEPSEEK_TOKENIZER_JSON ??
+    (existsSync(defaultTokenizerJson) ? defaultTokenizerJson : path.join(packageRoot, "assets", "tokenizer.json.br"));
   const tokenizerConfig = process.env.DEEPSEEK_TOKENIZER_CONFIG ?? path.join(packageRoot, "assets", "tokenizer_config.json");
   return { tokenizerJson, tokenizerConfig };
+}
+
+function readTokenizerJson(filePath: string): string {
+  const bytes = readFileSync(filePath);
+  return filePath.endsWith(".br") ? brotliDecompressSync(bytes).toString("utf8") : bytes.toString("utf8");
 }
 
 function loadTokenizer(): Tokenizer {
@@ -16,7 +25,7 @@ function loadTokenizer(): Tokenizer {
     return tokenizer;
   }
   const paths = tokenizerPath();
-  tokenizer = new Tokenizer(JSON.parse(readFileSync(paths.tokenizerJson, "utf8")), JSON.parse(readFileSync(paths.tokenizerConfig, "utf8")));
+  tokenizer = new Tokenizer(JSON.parse(readTokenizerJson(paths.tokenizerJson)), JSON.parse(readFileSync(paths.tokenizerConfig, "utf8")));
   return tokenizer;
 }
 
@@ -29,5 +38,9 @@ export function countTextTokens(text: string): number {
 }
 
 export function tokenizerDescription(): string {
-  return "deepseek_tokenizer-0.2.0 tokenizer.json + DeepSeek-V4 formatting";
+  return "deepseek_tokenizer-0.2.0 tokenizer.json(.br) + DeepSeek-V4 formatting";
+}
+
+export function resetTokenizerForTests(): void {
+  tokenizer = undefined;
 }
