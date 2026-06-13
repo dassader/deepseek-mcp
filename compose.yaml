@@ -2,9 +2,7 @@ name: deepseek-mcp
 
 services:
   deepseek-mcp:
-    image: ${DEEPSEEK_MCP_IMAGE:-deepseek-mcp:local}
-    build:
-      context: .
+    image: ghcr.io/dassader/deepseek-mcp:latest
     ports:
       - "${DEEPSEEK_MCP_HTTP_PORT:-8799}:8799"
     environment:
