@@ -37,6 +37,15 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Ensure Rollup native package
+        run: |
+          rollup_version="$(node -p "require('./node_modules/rollup/package.json').version")"
+          node_arch="$(node -p "process.arch")"
+          case "$node_arch" in
+            x64|arm64) npm install --no-save --ignore-scripts "@rollup/rollup-linux-${node_arch}-gnu@${rollup_version}" ;;
+            *) echo "No explicit Rollup native package mapping for ${node_arch}" ;;
+          esac
+
       - name: Run tests
         run: npm test
 
