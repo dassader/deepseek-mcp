@@ -10,7 +10,7 @@
   "files": [
     "dist/mcp",
     "dist/ui",
-    "assets/tokenizer.json",
+    "assets/tokenizer.json.br",
     "assets/tokenizer_config.json"
   ],
   "engines": {
