@@ -1,0 +1,45 @@
+{
+  "name": "@local/deepseek-mcp",
+  "version": "0.1.0",
+  "description": "A production-grade DeepSeek V4 MCP server for Codex agents.",
+  "type": "module",
+  "private": true,
+  "bin": {
+    "deepseek-mcp": "dist/mcp/index.js"
+  },
+  "files": [
+    "dist/mcp",
+    "dist/ui",
+    "assets/tokenizer.json",
+    "assets/tokenizer_config.json"
+  ],
+  "engines": {
+    "node": ">=20.0"
+  },
+  "scripts": {
+    "prebuild": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\"",
+    "build": "npm run build:server && npm run build:ui",
+    "build:server": "tsc -p tsconfig.json",
+    "build:ui": "vite build --config ui/vite.config.ts",
+    "start": "node dist/mcp/index.js",
+    "dev": "tsx mcp/index.ts",
+    "ui:dev": "vite --config ui/vite.config.ts",
+    "test": "npm run build && node --test dist/test/*.test.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "inspect": "npx @modelcontextprotocol/inspector node dist/mcp/index.js"
+  },
+  "dependencies": {
+    "@huggingface/tokenizers": "^0.1.3",
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^4.1.8"
+  },
+  "devDependencies": {
+    "@preact/preset-vite": "^2.10.5",
+    "@types/node": "^20.19.25",
+    "lucide-preact": "^1.18.0",
+    "preact": "^10.29.2",
+    "tsx": "^4.22.4",
+    "typescript": "^6.0.3",
+    "vite": "^6.4.1"
+  }
+}

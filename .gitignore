@@ -1,0 +1,16 @@
+node_modules/
+dist/
+coverage/
+data/
+
+.env
+.env.*
+!.env.example
+.github-token
+*.secret
+*.local-secret
+
+.idea/
+.DS_Store
+*.log
+*.tsbuildinfo
